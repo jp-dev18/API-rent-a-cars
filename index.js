@@ -1,6 +1,11 @@
 const express = require('express')
+const cors = require('cors');
+
 const app = express()
-const port = 3002
+const port = 3001
+
+app.use(cors());
+app.use(express.json());
 
 let cars = []
 
@@ -12,16 +17,16 @@ app.get('/cars', (req, res) => {
 })
 
 app.post('/cars', (req, res) => {
+    console.log(req.body)
     const car = {
-        name: "Song Plus",
-        category: "SUV",
-        seat: 5,
-        price: 250000,
-        transmission: "automatic",
-        fuel: "electric",
-        imageUrl: "",
-        description: "Um carro eletrico moderno e espaçoso.",
-        features: ["eletrico"]
+        name: req.body.name,
+        category: req.body.category,
+        seats: req.body.seats,
+        price: req.body.price,
+        transmission: req.body.transmission,
+        fuel: req.body.fuel,
+        image: req.body.image,
+        available: req.body.available,
     }
 
     //   ira adicionar um carro com status 201
