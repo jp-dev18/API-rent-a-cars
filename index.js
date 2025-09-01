@@ -1,13 +1,14 @@
+require("./instrument.js");
+require("dotenv").config();
+
 const email = require("@sendgrid/mail");
 const express = require("express");
 const cors = require("cors");
 const { Prisma } = require("@prisma/client");
 
-email.setApiKey(
-  "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"
-);
-
+email.setApiKey(process.env.SENDGRID_API_KEY);
 const { PrismaClient } = require("./generated/prisma");
+const { RENTCONFIRMATION_TAMPLATE } = require("./utils/constants");
 
 const prisma = new PrismaClient();
 
@@ -30,7 +31,7 @@ app.get("/send-email", async (req, res) => {
     to: "jpedromaciel25@gmail.com",
     from: "jpedromaciel25@gmail.com",
     subject: "Sending an email using SendGrid",
-    text: "Hello from SendGrid!",
+    html: RENTCONFIRMATION_TAMPLATE,
   };
   try {
     await email.send(emailContent);
