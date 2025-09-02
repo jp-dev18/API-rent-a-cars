@@ -1,64 +1,30 @@
 require("./instrument.js");
-require("dotenv").config();
 
-const email = require("@sendgrid/mail");
 const express = require("express");
 const cors = require("cors");
-const { Prisma } = require("@prisma/client");
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger-output.json');
+const bodyParser = require('body-parser');
 
-email.setApiKey(process.env.SENDGRID_API_KEY);
-const { PrismaClient } = require("./generated/prisma");
-const { RENTCONFIRMATION_TAMPLATE } = require("./utils/constants");
-
-const prisma = new PrismaClient();
+const routes = require('./endpoints.js');
 
 const app = express();
+
+/* Middlewares */
+app.use(bodyParser.json());
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
+const Sentry = require("@sentry/node");
 const port = 3001;
 
+// Use as rotas de endpoints.js
 app.use(cors());
 app.use(express.json());
+app.use('/', routes);
 
-let cars = [];
-
-app.get("/cars", (req, res) => {
-  //   ira retornar uma lista de carros com status 200
-
-  res.status(200).json(cars);
-});
-
-app.get("/send-email", async (req, res) => {
-  const emailContent = {
-    to: "jpedromaciel25@gmail.com",
-    from: "jpedromaciel25@gmail.com",
-    subject: "Sending an email using SendGrid",
-    html: RENTCONFIRMATION_TAMPLATE,
-  };
-  try {
-    await email.send(emailContent);
-    res.status(200).json({ message: "Email sent successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Error sending email" });
-  }
-});
-
-app.post("/cars", (req, res) => {
-  console.log(req.body);
-  const car = {
-    name: req.body.name,
-    category: req.body.category,
-    seats: req.body.seats,
-    price: req.body.price,
-    transmission: req.body.transmission,
-    fuel: req.body.fuel,
-    image: req.body.image,
-    available: req.body.available,
-  };
-
-  //   ira adicionar um carro com status 201
-  cars.push(car);
-  res.status(201).json(car);
-});
+Sentry.setupExpressErrorHandler(app);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
-});
+}); 
